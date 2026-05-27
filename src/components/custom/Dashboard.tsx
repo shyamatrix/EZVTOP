@@ -1,0 +1,619 @@
+"use client";
+import TopHeader from "./header/TopHeader";
+import BottomNav from "./header/BottomNav";
+import { motion, AnimatePresence } from "framer-motion";
+import StatsCards from "./statCards";
+import ODHoursModal from "./ODHoursModal";
+import GradesModal from "./Exams/GradesModal";
+import AttendanceTabs from "./attendance/attendanceTabs";
+import ExamsSubTabs from "./Exams/ExamSubsTab";
+import MarksDisplay from "./Exams/marksDislay";
+import ScheduleDisplay from "./Exams/SchduleDisplay";
+import HostelSubTabs from "./Hostel/HostelSubsTab";
+import MessDisplay from "./Hostel/messDisplay";
+import LaundryDisplay from "./Hostel/LaundryDisplay";
+import AttendanceSubTabs from "./attendance/AttendanceSubsTabs";
+import CalendarView from "./attendance/CalendarView";
+import { useState, useEffect, useRef } from "react";
+import { Settings, AlertTriangle } from "lucide-react";
+import LeaveDisplay from "./Hostel/LeaveDisplay";
+import AllGradesDisplay from "./Exams/AllGradesDisplay";
+import { API_BASE } from "./Main";
+import MarksSubTab from "./Exams/MarksSubTab";
+import ScheduleSubTab from "./Exams/ScheduleSubTab";
+import TimetableGrid from "./attendance/TimetableGrid";
+import AIGPAHelper from "./AIGPAHelper";
+import AnalysisTab from "./Exams/AnalysisTab";
+import BunkPlanner from "./attendance/BunkPlanner";
+import ScheduleSubTabs from "./attendance/ScheduleSubTabs";
+
+export default function DashboardContent({
+  activeTab,
+  setActiveTab,
+  handleLogOutRequest,
+  handleReloadRequest,
+  GradesData,
+  allGradesData,
+  attendancePercentage,
+  ODhoursData,
+  ODhoursIsOpen,
+  setODhoursIsOpen,
+  GradesDisplayIsOpen,
+  setGradesDisplayIsOpen,
+  attendanceData,
+  activeDay,
+  setActiveDay,
+  marksData,
+  activeSubTab,
+  setActiveSubTab,
+  ScheduleData,
+  hostelData,
+  HostelActiveSubTab,
+  setHostelActiveSubTab,
+  activeAttendanceSubTab,
+  setActiveAttendanceSubTab,
+  calendarData,
+  setCalender,
+  setIsReloading,
+  setProgressBar,
+  setMessage,
+  loginToVTOP,
+  setAllGradesData,
+  sethostelData,
+  setGradesData,
+  setScheduleData,
+  handleLogin,
+  moodleData,
+  setMoodleData,
+  IDs,
+  setIDs,
+  vitolData,
+  setVitolData,
+  settings,
+  setSettings
+}) {
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
+  const hasMoved = useRef(false);
+  const [activeScheduleSubTab, setActiveScheduleSubTab] = useState<"grid" | "bunk">("grid");
+  const [showSettingsPage, setShowSettingsPage] = useState<boolean>(false);
+  const [showSummerModal, setShowSummerModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (settings?.currSemesterID?.endsWith("07")) {
+      const dismissed = sessionStorage.getItem("summer_sem_alert_dismissed");
+      if (!dismissed) {
+        setShowSummerModal(true);
+      }
+    }
+  }, [settings?.currSemesterID]);
+
+  const tabsOrder = ["attendance", "schedule", "exams", "hostel"];
+
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+    hasMoved.current = false;
+  };
+
+  const handleTouchMove = (e) => {
+    const touch = e.touches[0];
+    touchEndX.current = touch.clientX;
+    touchEndY.current = touch.clientY;
+
+    const diffX = Math.abs(touchStartX.current - touchEndX.current);
+    const diffY = Math.abs(touchStartY.current - touchEndY.current);
+
+    if (diffX > diffY && diffX > 10) hasMoved.current = true;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!hasMoved.current) return;
+
+    const diffX = touchStartX.current - touchEndX.current;
+    const diffY = touchStartY.current - touchEndY.current;
+
+    if (Math.abs(diffY) > Math.abs(diffX)) return;
+
+    const target = e.target.closest("button, a, input, textarea, select, [data-prevent-swipe]");
+    if (target) return;
+
+    const scrollable = e.target.closest("[data-scrollable], [style*='overflow-x']");
+    if (scrollable) return;
+
+    if (Math.abs(diffX) < 75) return;
+
+    const currentIndex = tabsOrder.indexOf(activeTab);
+    if (diffX > 0 && currentIndex < tabsOrder.length - 1) {
+      setActiveTab(tabsOrder[currentIndex + 1]);
+    } else if (diffX < 0 && currentIndex > 0) {
+      setActiveTab(tabsOrder[currentIndex - 1]);
+    }
+  };
+
+  const handleAllGradesFetch = async () => {
+    setIsReloading(true);
+    try {
+      const { cookies, authorizedID, csrf } = await loginToVTOP();
+
+      const AllGradesRes = await fetch(`${API_BASE}/api/all-grades`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cookies: cookies, authorizedID, csrf }),
+      });
+
+      const AllGradesData = await AllGradesRes.json();
+      setProgressBar((prev) => prev + 40);
+
+      setAllGradesData(AllGradesData);
+      localStorage.setItem("allGrades", JSON.stringify(AllGradesData));
+
+      setMessage((prev) => prev + "\n✅ All grades reloaded successfully!");
+      setProgressBar(100);
+      setIsReloading(false);
+    } catch (err) {
+      console.error(err);
+      setMessage(
+        "❌ " + (err instanceof Error ? err.message : "All Grades fetch failed, check console.")
+      );
+      setProgressBar(0);
+    }
+  };
+
+  const handleCalendarFetch = async (FncalendarType) => {
+    setIsReloading(true);
+    try {
+      const { cookies, authorizedID, csrf } = await loginToVTOP();
+
+      const calenderRes = await fetch(`${API_BASE}/api/calendar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cookies: cookies,
+          authorizedID, csrf,
+          type: FncalendarType || "ALL",
+          semesterId: settings.currSemesterID
+        }),
+      });
+
+      const CalenderRes = await calenderRes.json();
+      setProgressBar((prev) => prev + 40);
+
+      setCalender(CalenderRes);
+      setSettings(prev => ({ ...prev, calendarType: FncalendarType || "ALL" }))
+      localStorage.setItem("calender", JSON.stringify(CalenderRes));
+      localStorage.setItem("settings", JSON.stringify({ ...settings, calendarType: FncalendarType }));
+
+      setMessage((prev) => prev + "\n✅ Calendar reloaded successfully!");
+      setProgressBar(100);
+      setIsReloading(false);
+    } catch (err) {
+      console.error(err);
+      setMessage(
+        "❌ " + (err instanceof Error ? err.message : "Calendar fetch failed, check console.")
+      );
+      setProgressBar(0);
+    }
+  };
+
+  const handleFetchGrades = async () => {
+    setIsReloading(true);
+    try {
+      const { cookies, authorizedID, csrf } = await loginToVTOP();
+
+      const gradesRes = await fetch(`${API_BASE}/api/grades`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cookies, authorizedID, csrf, semesterId: settings.currSemesterID }),
+      });
+
+      const gradesData = await gradesRes.json();
+      setProgressBar((prev) => prev + 40);
+
+      setGradesData(gradesData);
+      localStorage.setItem("grades", JSON.stringify(gradesData));
+
+      setMessage((prev) => prev + "\n✅ Grades reloaded successfully!");
+      setProgressBar(100);
+      setIsReloading(false);
+    } catch (err) {
+      console.error(err);
+      setMessage(
+        "❌ " + (err instanceof Error ? err.message : "Grades fetch failed, check console.")
+      );
+      setProgressBar(0);
+    }
+  };
+
+  const handleHostelDetailsFetch = async () => {
+    setIsReloading(true);
+    try {
+      const { cookies, authorizedID, csrf } = await loginToVTOP();
+
+      const HostelRes = await fetch(`${API_BASE}/api/hostel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cookies: cookies, authorizedID, csrf }),
+      });
+      const HostelData = await HostelRes.json();
+      setProgressBar((prev) => prev + 40);
+      sethostelData(HostelData);
+      localStorage.setItem("hostel", JSON.stringify(HostelData));
+      setMessage((prev) => prev + "\n✅ Hostel details reloaded successfully!");
+      setProgressBar(100);
+      setIsReloading(false);
+    } catch (err) {
+      console.error(err);
+      setMessage(
+        "❌ " + (err instanceof Error ? err.message : "Hostel details fetch failed, check console.")
+      );
+      setProgressBar(0);
+    }
+  };
+
+  const handleScheduleFetch = async () => {
+    setIsReloading(true);
+    try {
+      const { cookies, authorizedID, csrf } = await loginToVTOP();
+
+      const ScheduleRes = await fetch(`${API_BASE}/api/schedule`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cookies: cookies, authorizedID, csrf, semesterId: settings.currSemesterID }),
+      });
+      const ScheduleData = await ScheduleRes.json();
+      setProgressBar((prev) => prev + 40);
+      setScheduleData(ScheduleData);
+      localStorage.setItem("schedule", JSON.stringify(ScheduleData));
+      setMessage((prev) => prev + "\n✅ Schedule reloaded successfully!");
+      setProgressBar(100);
+      setIsReloading(false);
+    } catch (err) {
+      console.error(err);
+      setMessage(
+        "❌ " + (err instanceof Error ? err.message : "Schedule fetch failed, check console.")
+      );
+      setProgressBar(0);
+    }
+  };
+
+  const handleFetchMoodle = async (username = IDs.MoodleUsername, pass = IDs.MoodlePassword) => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setIsReloading(true);
+    setProgressBar(20);
+    setMessage("Fetching Moodle data...");
+    try {
+      const moodleRes = await fetch(`${API_BASE}/api/lms-data`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, pass }),
+      });
+
+      const moodleData = await moodleRes.json();
+      setProgressBar((prev) => prev + 40);
+
+      const prevData = JSON.parse(localStorage.getItem("moodleData") || "[]");
+
+      const mergedData = moodleData.map(item => {
+        const prevItem = prevData.find(p => p.url === item.url);
+        return {
+          ...item,
+          hidden: prevItem?.hidden ?? false,
+        };
+      });
+
+      setMoodleData(mergedData);
+      localStorage.setItem("moodleData", JSON.stringify(mergedData));
+
+      setMessage((prev) => prev + "\n✅ Moodle Data fetched Successfully!");
+      setProgressBar(100);
+      setIsReloading(false);
+    } catch (err) {
+      console.error(err);
+      setMessage(
+        "❌ " + (err instanceof Error ? err.message : "Moodle Data fetch failed, check console.")
+      );
+      setProgressBar(0);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="w-full max-w-md md:max-w-full mx-auto overflow-hidden bg-transparent"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      <TopHeader handleReloadRequest={handleReloadRequest} />
+
+      <div className="pb-32 pt-2 bg-transparent min-h-screen text-gray-900 dark:text-gray-100 midnight:text-gray-100 transition-colors">
+        {activeTab === "attendance" && (
+          <StatsCards
+            attendancePercentage={attendancePercentage}
+            ODhoursData={ODhoursData}
+            setODhoursIsOpen={setODhoursIsOpen}
+            feedbackStatus={GradesData.feedback}
+            marksData={marksData}
+            setGradesDisplayIsOpen={setGradesDisplayIsOpen}
+            CGPAHidden={settings.CGPAHidden}
+            setCGPAHidden={(val: boolean) => {
+              setSettings(prev => ({ ...prev, CGPAHidden: val }))
+              localStorage.setItem("settings", JSON.stringify({ ...settings, CGPAHidden: val }))
+            }
+            }
+            attendancePercentageOrString={settings.attendancePercentageOrString}
+            setAttendancePercentageOrString={(val: string) => {
+              setSettings(prev => ({ ...prev, attendancePercentageOrString: val }))
+              localStorage.setItem("settings", JSON.stringify({ ...settings, attendancePercentageOrString: val }))
+            }
+            }
+          />
+        )}
+
+        {ODhoursIsOpen && (
+          <ODHoursModal
+            ODhoursData={ODhoursData}
+            onClose={() => setODhoursIsOpen(false)}
+          />
+        )}
+
+        {GradesDisplayIsOpen && (
+          <GradesModal
+            GradesData={GradesData}
+            marksData={marksData}
+            onClose={() => setGradesDisplayIsOpen(false)}
+            handleFetchGrades={handleFetchGrades}
+            attendance={attendanceData.attendance}
+          />
+        )}
+
+        {activeTab === "attendance" && attendanceData?.attendance && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+          >
+            <AttendanceSubTabs
+              activeSubTab={activeAttendanceSubTab}
+              setActiveAttendanceSubTab={setActiveAttendanceSubTab}
+            />
+
+            {activeAttendanceSubTab === "attendance" && (
+              <>
+                <AttendanceTabs
+                  data={attendanceData}
+                  activeDay={activeDay}
+                  setActiveDay={setActiveDay}
+                  calendars={calendarData.calendars}
+                  decimalValues={settings.decimalValues}
+                />
+              </>
+            )}
+
+            {activeAttendanceSubTab === "calendar" && (
+              <>
+                <CalendarView
+                  calendars={calendarData.calendars}
+                  calendarType={settings.calendarType}
+                  handleCalendarFetch={handleCalendarFetch}
+                />
+                <CalendarTabWrapper
+                  calendarType={settings.calendarType}
+                  handleCalendarFetch={handleCalendarFetch}
+                />
+              </>
+            )}
+          </motion.div>
+        )}
+
+        {activeTab === "schedule" && attendanceData?.attendance && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="px-4"
+          >
+            <ScheduleSubTabs
+              activeSubTab={activeScheduleSubTab}
+              setActiveSubTab={setActiveScheduleSubTab}
+            />
+            {activeScheduleSubTab === "grid" ? (
+              <TimetableGrid attendance={attendanceData.attendance} />
+            ) : (
+              <BunkPlanner attendance={attendanceData.attendance} />
+            )}
+          </motion.div>
+        )}
+
+        {activeTab === "exams" && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="px-4"
+          >
+            <ExamsSubTabs
+              activeSubTab={activeSubTab}
+              setActiveSubTab={setActiveSubTab}
+            />
+            {activeSubTab === "marks" && <MarksSubTab data={marksData} moodleData={moodleData} handleFetchMoodle={handleFetchMoodle} setMoodleData={setMoodleData} IDs={IDs} attendance={attendanceData?.attendance} />}
+            {activeSubTab === "schedule" && <ScheduleSubTab data={ScheduleData} handleScheduleFetch={handleScheduleFetch} />}
+            {activeSubTab === "grades" && <AllGradesDisplay data={allGradesData} handleAllGradesFetch={handleAllGradesFetch} CGPA={marksData?.cgpa} attendance={attendanceData?.attendance} />}
+            {activeSubTab === "analysis" && <AnalysisTab data={marksData} attendance={attendanceData?.attendance} allGradesData={allGradesData} />}
+          </motion.div>
+        )}
+
+        {activeTab === "hostel" && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="px-4 max-w-5xl mx-auto w-full"
+          >
+            <HostelSubTabs
+              HostelActiveSubTab={HostelActiveSubTab}
+              setHostelActiveSubTab={setHostelActiveSubTab}
+            />
+            {HostelActiveSubTab === "mess" && <MessDisplay hostelData={hostelData} handleHostelDetailsFetch={handleHostelDetailsFetch} />}
+            {HostelActiveSubTab === "laundry" && <LaundryDisplay hostelData={hostelData} handleHostelDetailsFetch={handleHostelDetailsFetch} />}
+            {HostelActiveSubTab === "leave" && <LeaveDisplay leaveData={hostelData.leaveHistory} handleHostelDetailsFetch={handleHostelDetailsFetch} />}
+          </motion.div>
+        )}
+      </div>
+
+      <BottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        handleLogOutRequest={handleLogOutRequest}
+        currSemesterID={settings.currSemesterID}
+        setCurrSemesterID={(val: string) => {
+          setSettings(prev => ({ ...prev, currSemesterID: val }))
+          localStorage.setItem("settings", JSON.stringify({ ...settings, currSemesterID: val }))
+        }
+        }
+        handleLogin={handleLogin}
+        setIsReloading={setIsReloading}
+        username={IDs.VtopUsername}
+        password={IDs.VtopPassword}
+        setPassword={(val: string[]) => {
+          setIDs(prev => ({ ...prev, VtopUsername: val[0], VtopPassword: val[1] }))
+          localStorage.setItem("IDs", JSON.stringify({ ...IDs, VtopUsername: val[0], VtopPassword: val[1] }))
+        }
+        }
+        settings={settings}
+        setSettings={setSettings}
+        showSettingsPage={showSettingsPage}
+        setShowSettingsPage={setShowSettingsPage}
+      />
+
+      <AIGPAHelper
+        marksData={marksData}
+        allGradesData={allGradesData}
+        attendanceData={attendanceData}
+        hostelData={hostelData}
+        scheduleData={ScheduleData}
+        moodleData={moodleData}
+      />
+
+      <AnimatePresence>
+        {showSummerModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowSummerModal(false);
+                sessionStorage.setItem("summer_sem_alert_dismissed", "true");
+              }}
+              className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-md"
+            />
+
+            {/* Modal Box */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", stiffness: 350, damping: 25 }}
+              className="relative w-full max-w-sm overflow-hidden bg-white/80 dark:bg-zinc-950/90 midnight:bg-black/90 backdrop-blur-2xl border border-white/20 dark:border-zinc-800/80 rounded-3xl p-6 shadow-2xl z-10 text-center space-y-6"
+            >
+              <div className="flex flex-col items-center gap-3">
+                <div className="p-3 rounded-2xl bg-pink-500/10 text-pink-500 animate-bounce">
+                  <AlertTriangle className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-black tracking-tight text-gray-900 dark:text-white uppercase">
+                  Summer Semester Active
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-zinc-400 leading-relaxed font-medium">
+                  You are currently logged into the <span className="text-pink-500 font-bold">Summer Semester</span>. To view your regular classes, attendance, and details, please change to the <span className="text-pink-500 font-bold">Winter Semester</span> in Settings.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => {
+                    setShowSummerModal(false);
+                    sessionStorage.setItem("summer_sem_alert_dismissed", "true");
+                    setShowSettingsPage(true);
+                  }}
+                  className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-2xl shadow-lg shadow-pink-500/10 active:scale-[0.98] transition-all hover:cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Settings className="w-4 h-4" />
+                  Change in Settings
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSummerModal(false);
+                    sessionStorage.setItem("summer_sem_alert_dismissed", "true");
+                  }}
+                  className="w-full py-3.5 rounded-2xl text-xs font-bold text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors hover:cursor-pointer"
+                >
+                  Got it, dismiss
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function CalendarTabWrapper({ calendarType, handleCalendarFetch }) {
+  const CALENDAR_TYPES = {
+    ALL: "General Semester",
+    ALL02: "General Flexible",
+    ALL03: "General Freshers",
+    ALL05: "General LAW",
+    ALL06: "Flexible Freshers",
+    ALL08: "Cohort LAW",
+    ALL11: "Flexible Research",
+    WEI: "Weekend Intra Semester",
+  };
+
+  const [selectedType, setSelectedType] = useState(calendarType || "ALL");
+
+  function handleSubmitCalendarType() {
+    handleCalendarFetch(selectedType);
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-5 p-6 text-center">
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 midnight:text-gray-100">
+        Select Calendar Type
+      </h2>
+
+      <select
+        value={selectedType}
+        onChange={(e) => setSelectedType(e.target.value)}
+        className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 
+                   dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
+                   midnight:bg-[#0f172a] midnight:text-gray-100
+                   focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition"
+      >
+        {Object.entries(CALENDAR_TYPES).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
+
+      <button
+        onClick={handleSubmitCalendarType}
+        className="px-6 py-2 rounded-md font-medium text-white bg-pink-600 hover:bg-pink-600 
+                   dark:bg-pink-500 dark:hover:bg-pink-600
+                   data-[theme=midnight]:bg-pink-500 data-[theme=midnight]:hover:bg-pink-600
+                   transition-colors duration-150"
+      >
+        Submit
+      </button>
+    </div>
+  );
+}
