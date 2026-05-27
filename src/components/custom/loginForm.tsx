@@ -80,7 +80,7 @@ export default function LoginForm({
             </span>
           </div>
           <h1 className="text-4xl font-extrabold tracking-wider bg-gradient-to-r from-pink-500 via-pink-500 to-pink-500 bg-clip-text text-transparent drop-shadow-sm select-none">
-            EZVTOP
+            UniCC
           </h1>
           <p className="text-gray-600 dark:text-gray-400 midnight:text-gray-400 max-w-sm mx-auto text-xs font-normal">
             Your premium VTOP client portal. Chennai Campus only. Clean, lightning fast, and elegant.

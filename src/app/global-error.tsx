@@ -13,7 +13,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[EZVTOP global app error]", error);
+    console.error("[UniCC global app error]", error);
   }, [error]);
 
   return (

@@ -102,7 +102,7 @@ function generateICSFile(subjects: Subject[], examType: string): string {
       ].join("\n");
     })
     .join("\n\n");
-  const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//EZVTOP//Schedule Export//EN", events,"END:VCALENDAR"].join("\n");
+  const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//UniCC//Schedule Export//EN", events,"END:VCALENDAR"].join("\n");
   const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
   return URL.createObjectURL(blob);
 }

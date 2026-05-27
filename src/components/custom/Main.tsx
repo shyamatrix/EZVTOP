@@ -12,7 +12,7 @@ import { dbStore } from "./AIGPAHelper";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, AlertCircle } from "lucide-react";
 
-export const API_BASE = "https://api.ezvtop.site";
+export const API_BASE = "https://api.uni-cc.site";
 
 type settings = {
   decimalValues: boolean;
@@ -618,12 +618,12 @@ export default function LoginPage() {
         <div className="relative z-10 flex flex-col items-center space-y-6">
           {/* Logo container */}
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-black font-black text-3xl shadow-2xl shadow-pink-500/25 border border-white/20 dark:border-black/20 animate-bounce">
-            EZ
+            UC
           </div>
           
           <div className="text-center space-y-1.5">
             <h1 className="text-2xl font-black tracking-widest bg-gradient-to-r from-blue-500 to-pink-500 bg-clip-text text-transparent uppercase">
-              EZVTOP
+              UniCC
             </h1>
             <div className="flex items-center justify-center gap-1.5">
               <span className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-zinc-400 font-bold">

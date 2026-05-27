@@ -39,14 +39,14 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
-const APP_NAME = "EZVTOP";
+const APP_NAME = "UniCC";
 const APP_DESCRIPTION = "Your premium VTOP client portal.";
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,
   title: {
     default: APP_NAME,
-    template: "%s - EZVTOP App",
+    template: "%s - UniCC App",
   },
   description: APP_DESCRIPTION,
   manifest: "/manifest.json",

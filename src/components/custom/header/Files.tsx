@@ -64,7 +64,7 @@ export default function Files() {
     };
 
     const getDownloadUrl = (fileID) =>
-        `https://assets.ezvtop.site/${fileID}?response-content-disposition=attachment`;
+        `https://assets.uni-cc.site/${fileID}?response-content-disposition=attachment`;
 
     useEffect(() => {
         fetchFiles();

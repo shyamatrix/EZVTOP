@@ -660,7 +660,7 @@ function StreamingMarkdownRenderer({
 }
 
 export class IndexedDBStore {
-  private dbName = "EZVTOP_AI_DB";
+  private dbName = "UniCC_AI_DB";
   private storeName = "ai_chat_store";
 
   private getDB(): Promise<IDBDatabase> {
@@ -857,7 +857,7 @@ export default function AIGPAHelper({
   }, [marksData, allGradesData, attendanceData, hostelData, scheduleData, moodleData]);
 
   useEffect(() => {
-    const dismissed = localStorage.getItem("ezvtop-ai-tooltip-dismissed");
+    const dismissed = localStorage.getItem("unicc-ai-tooltip-dismissed");
     if (!dismissed) {
       const timer = setTimeout(() => {
         setShowTooltip(true);
@@ -1323,7 +1323,7 @@ Return ONLY a strict JSON array containing the chosen module names. Example outp
       // Step 2: Build student context with only the selected data modules
       const context = getDynamicStudentContext(query, selectedDataTypes);
       
-      const systemInstruction = `You are EZVTOP AI, an elite Academic Mentor & Data Analyst for VIT Chennai Campus students.
+      const systemInstruction = `You are UniCC AI, an elite Academic Mentor & Data Analyst for VIT Chennai Campus students.
 Full Student Profile Datasets (JSON): ${context}
 
 Capabilities:
@@ -1378,7 +1378,7 @@ Rules:
 
       const data = await response.json();
       if (!data.choices && (data.error || data.message)) {
-        console.error("EZVTOP AI backend error response:", data);
+        console.error("UniCC AI backend error response:", data);
       }
       const choice = data.choices?.[0];
       const answer = choice?.message?.content || data.error?.message || data.message || "I was unable to analyze that. Please try again.";
@@ -1400,7 +1400,7 @@ Rules:
         ...prev,
         {
           role: "model",
-          text: "❌ Error connecting to EZVTOP AI. Please check your network connection.",
+          text: "❌ Error connecting to UniCC AI. Please check your network connection.",
         },
       ]);
     } finally {
@@ -1534,7 +1534,7 @@ The JSON must follow this structure:
               <div className="flex flex-col gap-1 pr-4">
                 <span className="text-[10px] font-black uppercase text-pink-500 flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
-                  EZVTOP AI GPA Helper
+                  UniCC AI GPA Helper
                 </span>
                 <span className="text-gray-500 dark:text-zinc-400 leading-relaxed font-semibold">
                   Get personalized grade target plans, attendance insights, and exam quiz prep!
@@ -1543,7 +1543,7 @@ The JSON must follow this structure:
               <button
                 onClick={() => {
                   setShowTooltip(false);
-                  localStorage.setItem("ezvtop-ai-tooltip-dismissed", "true");
+                  localStorage.setItem("unicc-ai-tooltip-dismissed", "true");
                 }}
                 className="absolute top-3.5 right-3.5 p-0.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-full text-gray-400 hover:text-rose-500 dark:text-zinc-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
               >
@@ -1627,7 +1627,7 @@ The JSON must follow this structure:
                   </div>
                   <div>
                     <h3 className="text-sm font-black tracking-tight text-gray-900 dark:text-white uppercase flex items-center gap-1.5">
-                      EZVTOP AI
+                      UniCC AI
                     </h3>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <span className="text-[9px] text-pink-600 dark:text-blue-400 font-black uppercase tracking-wider">
@@ -1723,7 +1723,7 @@ The JSON must follow this structure:
                         <div className="bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/20 dark:border-zinc-800/40 rounded-3xl p-5 text-center space-y-3 shadow-sm">
                           <Sparkles className="w-10 h-10 mx-auto text-pink-500 animate-pulse" />
                           <h4 className="text-sm font-bold text-gray-800 dark:text-zinc-200">
-                            Ask EZVTOP AI Anything
+                            Ask UniCC AI Anything
                           </h4>
                           <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
                             I analyze your attendance, internal marks, and target grade goals to offer specific, mathematical score plans using high-speed reasoning and LLM infrastructure.
@@ -1846,7 +1846,7 @@ The JSON must follow this structure:
                             <div className="p-1 rounded bg-pink-500/10 text-pink-500">
                               <Sparkles className="w-3.5 h-3.5 animate-[spin_4s_linear_infinite]" />
                             </div>
-                            <span className="font-extrabold uppercase text-[9px] tracking-wider text-pink-600 dark:text-blue-400">EZVTOP AI thinking...</span>
+                            <span className="font-extrabold uppercase text-[9px] tracking-wider text-pink-600 dark:text-blue-400">UniCC AI thinking...</span>
                           </div>
 
                           <div className="flex items-end gap-1.5 h-6 pl-1 pt-1.5">
@@ -1952,7 +1952,7 @@ The JSON must follow this structure:
                       <div className="bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/20 dark:border-zinc-800/40 rounded-3xl p-5 text-center space-y-4 shadow-sm">
                         <Award className="w-10 h-10 mx-auto text-pink-500 animate-pulse" />
                         <h4 className="text-sm font-bold text-gray-800 dark:text-zinc-200">
-                          Prepare with EZVTOP Exam Quiz
+                          Prepare with UniCC Exam Quiz
                         </h4>
                         <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
                           Test your understanding of your active courses. Select a course below to generate interactive multiple-choice questions graded instantly by the Instant model.

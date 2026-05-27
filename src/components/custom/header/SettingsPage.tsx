@@ -90,7 +90,7 @@ export default function SettingsPage({
             Settings
           </h2>
           <p className="text-[10px] text-gray-500 dark:text-zinc-400 mt-0.5">
-            Configure EZVTOP
+            Configure UniCC
           </p>
         </div>
 

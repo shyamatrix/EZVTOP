@@ -4,9 +4,9 @@ export const swaggerSpec = swaggerJSDoc({
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "EZVTOP API Documentation",
+            title: "UniCC API Documentation",
             version: "1.0.0",
-            description: "API documentation for the EZVTOP application.",
+            description: "API documentation for the UniCC application.",
         },
         tags: [
             { name: "System" },
@@ -16,7 +16,7 @@ export const swaggerSpec = swaggerJSDoc({
             { name: "Files" },
         ],
         servers: [
-            { url: "https://api.ezvtop.site" },
+            { url: "https://api.uni-cc.site" },
             { url: "http://localhost:3000" },
         ],
         // components: {

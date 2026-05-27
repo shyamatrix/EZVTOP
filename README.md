@@ -1,6 +1,6 @@
-# EZVTOP
+# UniCC
 
-EZVTOP is a premium, lightning-fast web portal wrapper designed specifically for students to view and organize their academic data in a clean and beautiful interface. 
+UniCC is a premium, lightning-fast web portal wrapper designed specifically for students to view and organize their academic data in a clean and beautiful interface. 
 
 ---
 

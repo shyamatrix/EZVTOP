@@ -13,7 +13,7 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[EZVTOP client route error]", error);
+    console.error("[UniCC client route error]", error);
   }, [error]);
 
   return (

@@ -22,11 +22,11 @@ export default function Footer({ isLoggedIn }: FooterProps) {
         <hr className="border-gray-200 dark:border-gray-800 midnight:border-gray-800 w-11/12 mx-auto mb-5" />
 
         <p className="text-sm font-bold tracking-widest uppercase bg-gradient-to-r from-pink-500 to-blue-400 bg-clip-text text-transparent mb-2">
-          EZVTOP — The Premium VTOP Portal
+          UniCC — The Premium VTOP Portal
         </p>
 
         <span className="text-xs text-gray-400 dark:text-gray-500 midnight:text-gray-500 block">
-          &copy; {new Date().getFullYear()} EZVTOP. All rights reserved.
+          &copy; {new Date().getFullYear()} UniCC. All rights reserved.
         </span>
 
         <div className="mt-2 flex items-center justify-center gap-1">

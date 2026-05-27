@@ -76,9 +76,9 @@ router.post("/", upload.array("files"), async (req, res) => {
         }));
 
         await mailTransporter.sendMail({
-            from: `EZVTOP <${process.env.SMTP_USER}>`,
+            from: `UniCC <${process.env.SMTP_USER}>`,
             to: to.toString(),
-            subject: subject ? subject.toString() : "Files from EZVTOP",
+            subject: subject ? subject.toString() : "Files from UniCC",
             text: `Your files, sent on ${new Date().toLocaleString()}`,
             attachments: attachment,
         });

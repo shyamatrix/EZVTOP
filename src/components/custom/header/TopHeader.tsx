@@ -58,7 +58,7 @@ export default function TopHeader({ handleReloadRequest }) {
           E
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-400 drop-shadow-sm">
-          EZVTOP
+          UniCC
         </h1>
       </div>
 

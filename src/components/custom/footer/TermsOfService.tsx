@@ -22,7 +22,7 @@ export default function TermsOfServicePage({ handleClose }) {
 
             <div className="w-full max-w-3xl space-y-4 text-gray-700 dark:text-gray-300 midnight:text-gray-200 text-sm leading-relaxed">
                 <p>
-                    Welcome to <strong>EZVTOP</strong>. By using this application, you agree to the following Terms of Service.
+                    Welcome to <strong>UniCC</strong>. By using this application, you agree to the following Terms of Service.
                     Please read them carefully before using the app.
                 </p>
 
@@ -30,7 +30,7 @@ export default function TermsOfServicePage({ handleClose }) {
                     Purpose
                 </h3>
                 <p>
-                    <strong>EZVTOP</strong> is an experimental web application created solely for educational and personal
+                    <strong>UniCC</strong> is an experimental web application created solely for educational and personal
                     use. It provides tools to help students view and organize their academic data retrieved from
                     <strong> VTOP</strong> (VIT’s official portal). This app is not an official VIT product and is
                     <strong> not affiliated, endorsed, or maintained by Vellore Institute of Technology (VIT)</strong>
@@ -56,7 +56,7 @@ export default function TermsOfServicePage({ handleClose }) {
                     No Monetization or Commercial Use
                 </h3>
                 <p>
-                    <strong>EZVTOP</strong> is a free and non-commercial project. The developer does not earn revenue,
+                    <strong>UniCC</strong> is a free and non-commercial project. The developer does not earn revenue,
                     display advertisements, sell data, or monetize the service in any way.
                     The app is provided purely for fun, learning, and experimentation purposes.
                 </p>
@@ -95,7 +95,7 @@ export default function TermsOfServicePage({ handleClose }) {
                 </h3>
                 <p>
                     For any concerns, questions, or feedback related to this app or these Terms of Service,
-                    you can contact the developer at <strong>support@ezvtop.site</strong>.
+                    you can contact the developer at <strong>support@uni-cc.site</strong>.
                 </p>
 
                 <p className="text-xs text-gray-500 dark:text-gray-400 midnight:text-gray-400 mt-6">

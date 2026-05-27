@@ -1,5 +1,5 @@
 {
-  "name": "ezvtop",
+  "name": "uni-cc",
   "version": "0.7.0",
   "private": true,
   "scripts": {
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.946.0",
+    "@google-cloud/firestore": "^7.11.0",
     "@next/third-parties": "16.0.0",
     "@opennextjs/cloudflare": "^1.11.0",
     "@radix-ui/react-dialog": "^1.1.15",
