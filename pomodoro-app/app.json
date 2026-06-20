@@ -19,27 +19,20 @@
     "android": {
       "package": "com.pomodoroflow.app",
       "versionCode": 1,
+      "newArchEnabled": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0A0A1A"
       },
       "permissions": [
-        "VIBRATE",
-        "RECEIVE_BOOT_COMPLETED"
+        "VIBRATE"
       ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font",
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon.png",
-          "color": "#7C4DFF"
-        }
-      ]
+      "expo-font"
     ]
   }
 }
