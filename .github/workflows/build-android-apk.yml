@@ -1,0 +1,108 @@
+name: Build Android APK - PomodoroFlow
+
+on:
+  push:
+    branches:
+      - claude/pomodoro-react-native-app-heqptz
+    paths:
+      - 'pomodoro-app/**'
+      - '.github/workflows/build-android-apk.yml'
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: pomodoro-app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Remove root npmrc to avoid pnpm conflict
+        run: rm -f .npmrc
+        working-directory: ${{ github.workspace }}
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        working-directory: ${{ github.workspace }}
+        run: |
+          yes | sdkmanager --licenses --sdk_root=$ANDROID_SDK_ROOT > /dev/null 2>&1 || true
+          sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools" --sdk_root=$ANDROID_SDK_ROOT
+
+      - name: Install npm dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run Expo Prebuild
+        run: npx expo prebuild --platform android --clean --no-install
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+          EXPO_NO_GIT_STATUS: 1
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon -q
+        working-directory: pomodoro-app/android
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+          JAVA_HOME: ${{ env.JAVA_HOME }}
+
+      - name: Rename and collect APK
+        working-directory: ${{ github.workspace }}
+        run: |
+          mkdir -p release-output
+          cp pomodoro-app/android/app/build/outputs/apk/debug/app-debug.apk \
+             release-output/PomodoroFlow-v1.0.0.apk
+          echo "APK Info:"
+          ls -lh release-output/
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PomodoroFlow-APK
+          path: release-output/PomodoroFlow-v1.0.0.apk
+          retention-days: 30
+
+      - name: Build summary
+        working-directory: ${{ github.workspace }}
+        run: |
+          echo "## ✅ PomodoroFlow APK Built Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**File:** \`PomodoroFlow-v1.0.0.apk\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Size:** $(du -sh release-output/PomodoroFlow-v1.0.0.apk | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📱 How to install:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Download the APK from the **Artifacts** section below" >> $GITHUB_STEP_SUMMARY
+          echo "2. On your Android device: Settings → Security → Enable **Unknown Sources**" >> $GITHUB_STEP_SUMMARY
+          echo "3. Open the downloaded APK to install" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎯 App Features (10 Screens):" >> $GITHUB_STEP_SUMMARY
+          echo "- 🍅 Animated Splash Screen" >> $GITHUB_STEP_SUMMARY
+          echo "- 📖 4-slide Onboarding Carousel" >> $GITHUB_STEP_SUMMARY
+          echo "- ⏱️ Home Timer (circular SVG progress, 3 modes)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔍 Focus Mode (full-screen immersive)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Task Manager (priority, category, progress)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 Statistics (charts, heatmap, analytics)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📜 Session History (grouped by date)" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚙️ Settings (timer config, automation)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏆 Achievements (9 badges, rarity system)" >> $GITHUB_STEP_SUMMARY
+          echo "- 👤 Profile (XP/leveling, daily goals)" >> $GITHUB_STEP_SUMMARY
